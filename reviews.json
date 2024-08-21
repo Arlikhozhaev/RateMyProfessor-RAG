@@ -1,0 +1,125 @@
+{
+    "reviews": [
+      {
+        "professor": "Dr. Emily Carter",
+        "subject": "Introduction to Computer Science",
+        "stars": 5,
+        "review": "Dr. Carter is amazing at explaining complex concepts in a simple way. Her classes are engaging and her office hours are very helpful."
+      },
+      {
+        "professor": "David Nguyen",
+        "subject": "Software Engineering",
+        "stars": 4,
+        "review": "Nguyen is a great teacher who encourages hands-on learning. His projects are fun but can be a bit overwhelming at times."
+      },
+      {
+        "professor": "Dr. Sarah Mitchell",
+        "subject": "Algorithms and Data Structures",
+        "stars": 3,
+        "review": "Dr. Mitchell is very knowledgeable but her lectures can be a bit dry. Be prepared to put in extra study hours."
+      },
+      {
+        "professor": "Dr. James Patel",
+        "subject": "Database Systems",
+        "stars": 4,
+        "review": "Dr. Patel is thorough and detailed in his lectures. He can be strict, but if you follow along and ask questions, you'll do well."
+      },
+      {
+        "professor": "Maria Rossi",
+        "subject": "Operating Systems",
+        "stars": 4,
+        "review": "Rossi is a good lecturer with clear explanations. Sometimes the workload can be heavy, but she is supportive."
+      },
+      {
+        "professor": "Dr. Alan Thompson",
+        "subject": "Artificial Intelligence",
+        "stars": 5,
+        "review": "Dr. Thompson is an AI expert and his passion for the subject is clear. He makes difficult concepts much easier to grasp."
+      },
+      {
+        "professor": "Dr. Rebecca Lee",
+        "subject": "Computer Networks",
+        "stars": 4,
+        "review": "Dr. Lee's lectures are well-structured and informative. She is very responsive to questions both in class and online."
+      },
+      {
+        "professor": "Tom Anderson",
+        "subject": "Discrete Mathematics",
+        "stars": 2,
+        "review": "Anderson's lectures can be confusing and disorganized. The exams are tough, and you have to do a lot of self-study."
+      },
+      {
+        "professor": "Dr. Nina Williams",
+        "subject": "Human-Computer Interaction",
+        "stars": 5,
+        "review": "Dr. Williams is great at making HCI fun and creative. Her feedback is incredibly valuable and helps improve your work."
+      },
+      {
+        "professor": "Michael Brown",
+        "subject": "Web Development",
+        "stars": 4,
+        "review": "Brown is laid-back and knowledgeable. The course is hands-on, but sometimes the guidance is a bit lacking."
+      },
+      {
+        "professor": "Dr. Lisa Green",
+        "subject": "Software Design Patterns",
+        "stars": 5,
+        "review": "Dr. Green's course is very well organized and insightful. She encourages critical thinking and provides great real-world examples."
+      },
+      {
+        "professor": "John White",
+        "subject": "Mobile App Development",
+        "stars": 3,
+        "review": "White's class is okay, but his lectures can be a bit dull. The projects are useful but sometimes lack clear direction."
+      },
+      {
+        "professor": "Dr. Olivia Harris",
+        "subject": "Cybersecurity",
+        "stars": 5,
+        "review": "Dr. Harris is extremely knowledgeable in cybersecurity. Her classes are challenging but rewarding if you put in the effort."
+      },
+      {
+        "professor": "Liam Carter",
+        "subject": "Data Science",
+        "stars": 4,
+        "review": "Carter is a good lecturer with a lot of industry experience. Sometimes the material can be a bit dense, but he is helpful."
+      },
+      {
+        "professor": "Dr. Rachel Adams",
+        "subject": "Machine Learning",
+        "stars": 5,
+        "review": "Dr. Adams is one of the best professors I’ve had. She simplifies complex topics and makes the course engaging."
+      },
+      {
+        "professor": "Paul Scott",
+        "subject": "Digital Logic Design",
+        "stars": 3,
+        "review": "Scott's lectures are solid, but the pacing can be a bit fast. You need to stay on top of the material to succeed."
+      },
+      {
+        "professor": "Dr. Kevin Lewis",
+        "subject": "Computer Graphics",
+        "stars": 4,
+        "review": "Dr. Lewis is great at explaining difficult topics. The course can be challenging, but his teaching style makes it manageable."
+      },
+      {
+        "professor": "Lauren Reed",
+        "subject": "Operating Systems II",
+        "stars": 3,
+        "review": "Reed's class is informative but can be tough to follow at times. The workload is reasonable, but the exams are difficult."
+      },
+      {
+        "professor": "Dr. Charlotte King",
+        "subject": "Quantum Computing",
+        "stars": 5,
+        "review": "Dr. King is a quantum computing expert. Her lectures are fascinating and she makes the material accessible to everyone."
+      },
+      {
+        "professor": "Daniel Young",
+        "subject": "Data Visualization",
+        "stars": 4,
+        "review": "Young is a good instructor with a focus on practical skills. The projects are interesting, but sometimes the instructions are unclear."
+      }
+    ]
+  }
+  
