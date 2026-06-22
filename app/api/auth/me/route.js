@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import db from "../../../../lib/db.js";
-import { verifySessionToken } from "../../../../lib/auth.js";
+import db from "../../../../Lib/db.js";
+import { verifySessionToken } from "../../../../Lib/auth.js";
 
 export async function GET(req) {
   const token = req.cookies.get("professor_session")?.value;

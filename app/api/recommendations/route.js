@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
-import db from "../../../lib/db.js";
-import { verifySessionToken } from "../../../lib/auth.js";
+import db from "../../../Lib/db.js";
+import { verifySessionToken } from "../../../Lib/auth.js";
 
 async function loadReviews() {
   const filePath = path.join(process.cwd(), "reviews.json");
