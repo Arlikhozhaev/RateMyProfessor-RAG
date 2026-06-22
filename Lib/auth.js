@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.AUTH_SECRET || "dev-secret-change-me";
+const JWT_SECRET = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "dev-secret-change-me";
 
 export function createSessionToken(user) {
   return jwt.sign(
@@ -21,6 +21,7 @@ export function verifySessionToken(token) {
 export const sessionCookieOptions = {
   httpOnly: true,
   sameSite: "lax",
+  secure: process.env.NODE_ENV === "production",
   path: "/",
   maxAge: 60 * 60 * 24 * 7,
 };

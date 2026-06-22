@@ -3,6 +3,8 @@ import fs from "fs/promises";
 import path from "path";
 import OpenAI from "openai";
 
+export const runtime = "nodejs";
+
 const SYSTEM_PROMPT = `
 You are ProfessorMatch AI, an expert academic advisor for students choosing courses and professors.
 Your job is to help students understand how a professor fits their goals, learning style, and course needs.

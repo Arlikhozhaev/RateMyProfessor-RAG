@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import db from "../../../../Lib/db.js";
 import { createSessionToken, sessionCookieOptions } from "../../../../Lib/auth.js";
 
+export const runtime = "nodejs";
+
 export async function POST(req) {
   try {
     const { email, password } = await req.json();

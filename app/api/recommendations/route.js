@@ -4,6 +4,8 @@ import path from "path";
 import db from "../../../Lib/db.js";
 import { verifySessionToken } from "../../../Lib/auth.js";
 
+export const runtime = "nodejs";
+
 async function loadReviews() {
   const filePath = path.join(process.cwd(), "reviews.json");
   const raw = await fs.readFile(filePath, "utf8");
