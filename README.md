@@ -1,37 +1,76 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# RateMyProfessor-RAG
+
+A modern AI-powered professor recommendation platform built with Next.js, SQLite, and retrieval-based chat flows. The app helps students explore professors using review data, personalized search results, and a conversational assistant.
+
+## Overview
+
+RateMyProfessor-RAG combines:
+- a polished student-facing interface for discovering professors,
+- a retrieval-style recommendation engine grounded in local review data,
+- chat-based guidance for course and professor discovery,
+- lightweight user authentication and analytics tracking.
+
+## Core Features
+
+- **Professor search and recommendations** using local review data and ranking logic
+- **AI chat assistant** for natural-language questions about professors and courses
+- **User authentication** with session cookies and secure password hashing
+- **Analytics tracking** for queries and engagement events
+- **SQLite-backed persistence** for user and recommendation data
+
+## Tech Stack
+
+- **Frontend:** Next.js, React, Material UI
+- **Backend/API:** Next.js Route Handlers
+- **Database:** SQLite via `better-sqlite3`
+- **Auth:** JWT + cookie sessions
+- **Security:** bcrypt password hashing
+- **Data source:** `reviews.json`
+
+## Project Structure
+
+- `app/` — application pages and API routes
+- `app/api/` — chat, auth, analytics, and recommendation endpoints
+- `lib/` — shared database and authentication helpers
+- `scripts/` — database initialization utilities
+- `data/` — local database storage
+- `reviews.json` — professor review dataset
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Initialize the database
+
+```bash
+npm run db:init
+```
+
+### 3. Start the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app will be available at:
+- http://localhost:3000
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Environment Notes
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+For production deployment, configure the following environment variables as needed:
+- `AUTH_SECRET` for JWT signing
+- `DB_PATH` for database location (optional)
+- `OPENAI_API_KEY` for enhanced AI responses (optional)
 
-## Learn More
+## Deployment
 
-To learn more about Next.js, take a look at the following resources:
+This project is ready to be deployed to any platform that supports Next.js applications, such as Vercel, Azure App Service, or similar hosting providers.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+This project is for educational and demonstration purposes.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-"# RateMyProfessor-RAG" 
