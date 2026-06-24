@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from "react";
-import { Box, Stack } from "@mui/material";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Box, CircularProgress, Stack } from "@mui/material";
 import HeroBanner from "../components/layout/HeroBanner";
 import AuthPanel from "../components/auth/AuthPanel";
 import ChatPanel from "../components/chat/ChatPanel";
@@ -10,7 +11,9 @@ import { quickPrompts } from "../constants/app";
 import { useAuth } from "../hooks/useAuth";
 import { useChat } from "../hooks/useChat";
 
-export default function Home() {
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const promptHandledRef = useRef(false);
   const [analytics, setAnalytics] = useState({
     totalEvents: 0,
     userEvents: 0,
@@ -55,6 +58,14 @@ export default function Home() {
     askAboutProfessor,
     handleKeyDown,
   } = useChat(fetchAnalytics);
+
+  useEffect(() => {
+    const prompt = searchParams.get("prompt");
+    if (!prompt || promptHandledRef.current || loading) return;
+
+    promptHandledRef.current = true;
+    sendMessage(prompt);
+  }, [searchParams, sendMessage, loading]);
 
   const scrollToRecommendations = () => {
     document.getElementById("recommendations")?.scrollIntoView({
@@ -120,5 +131,19 @@ export default function Home() {
         </Stack>
       </Box>
     </Box>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense
+      fallback={
+        <Box sx={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
+          <CircularProgress />
+        </Box>
+      }
+    >
+      <HomeContent />
+    </Suspense>
   );
 }

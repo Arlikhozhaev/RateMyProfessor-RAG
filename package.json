@@ -7,7 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:init": "node Scripts/init-db.mjs"
+    "db:init": "node Scripts/init-db.mjs",
+    "test": "npm run test:unit",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:e2e:setup": "playwright install chromium",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
@@ -24,7 +29,9 @@
     "react-markdown": "^10.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.51.0",
     "eslint": "^8",
-    "eslint-config-next": "14.2.5"
+    "eslint-config-next": "14.2.5",
+    "vitest": "^3.0.5"
   }
 }

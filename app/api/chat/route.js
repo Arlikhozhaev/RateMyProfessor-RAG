@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { getUserFromRequest } from "../../../Lib/auth.js";
 import { recordEvent } from "../../../Lib/analytics.js";
+import { checkRateLimit, getClientKey } from "../../../Lib/rateLimit.js";
 import {
   searchReviews,
   formatContext,
@@ -41,6 +42,18 @@ export async function POST(req) {
       return NextResponse.json(
         { message: "Please provide a question first." },
         { status: 400 }
+      );
+    }
+
+    const rateLimit = checkRateLimit(`chat:${getClientKey(req)}`, {
+      limit: 30,
+      windowMs: 60_000,
+    });
+
+    if (!rateLimit.ok) {
+      return NextResponse.json(
+        { message: "Too many requests. Please wait a moment and try again." },
+        { status: 429 }
       );
     }
 
