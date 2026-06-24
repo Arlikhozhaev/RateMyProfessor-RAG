@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
 import OpenAI from "openai";
 import { getUserFromRequest } from "../../../Lib/auth.js";
 import { recordEvent } from "../../../Lib/analytics.js";
+import {
+  searchReviews,
+  formatContext,
+  buildStructuredResponse,
+} from "../../../Lib/retrieval/search.js";
 
 export const runtime = "nodejs";
 
@@ -17,116 +20,8 @@ When answering:
 - Keep the tone supportive, clear, and practical.
 - Prefer concise answers with actionable guidance.
 - For exact-name questions, use a short structured explanation: match, subject, rating, and a one-sentence takeaway.
+- Use markdown for lists and emphasis when helpful.
 `;
-
-async function loadReviews() {
-  const filePath = path.join(process.cwd(), "reviews.json");
-  const raw = await fs.readFile(filePath, "utf8");
-  const parsed = JSON.parse(raw);
-  return Array.isArray(parsed.reviews) ? parsed.reviews : [];
-}
-
-function rankReviews(reviews, query) {
-  const normalizedQuery = query.toLowerCase();
-  const terms = normalizedQuery.split(/\s+/).filter(Boolean);
-
-  return reviews
-    .map((review) => {
-      const text = `${review.professor} ${review.subject} ${review.review}`.toLowerCase();
-      let score = 0;
-
-      if (text.includes(normalizedQuery)) score += 6;
-      terms.forEach((term) => {
-        if (text.includes(term)) score += 1;
-      });
-
-      score += review.stars;
-      return { ...review, score };
-    })
-    .sort((a, b) => b.score - a.score || b.stars - a.stars)
-    .slice(0, 5);
-}
-
-function normalizeText(value) {
-  return String(value || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function formatContext(reviews) {
-  return reviews
-    .map(
-      (review) =>
-        `Professor: ${review.professor}\nSubject: ${review.subject}\nRating: ${review.stars}/5\nReview: ${review.review}`
-    )
-    .join("\n\n");
-}
-
-function extractNameQuery(query) {
-  const patterns = [
-    /\b(?:professor|teacher|instructor)\b[^a-z0-9]{0,20}(?:named|called)\s+([a-z][a-z .'-]{1,40})/i,
-    /\b(?:is|are|do|does|did)\s+there\s+(?:a|an)?\s*(?:professor|teacher|instructor)?\s*(?:named|called)?\s+([a-z][a-z .'-]{1,40})/i,
-    /\b(?:name|named|called)\s+([a-z][a-z .'-]{1,40})/i,
-  ];
-
-  for (const pattern of patterns) {
-    const match = query.match(pattern);
-    if (match && match[1]) {
-      return match[1].trim();
-    }
-  }
-
-  return null;
-}
-
-function findExactNameMatches(reviews, nameQuery) {
-  const normalizedName = normalizeText(nameQuery);
-
-  return reviews.filter((review) => {
-    const normalizedProfessor = normalizeText(review.professor);
-    return (
-      normalizedProfessor === normalizedName ||
-      normalizedProfessor.includes(normalizedName) ||
-      normalizedName.includes(normalizedProfessor)
-    );
-  });
-}
-
-function buildStructuredResponse(query, reviews) {
-  if (!reviews.length) {
-    return "I couldn't find enough professor information right now. Try asking about a specific subject, course difficulty, or teaching style.";
-  }
-
-  const explicitName = extractNameQuery(query);
-  if (explicitName) {
-    const matches = findExactNameMatches(reviews, explicitName);
-    if (matches.length > 0) {
-      const match = matches[0];
-      return [
-        `Yes — there is a professor matching "${explicitName}" in the dataset.`,
-        ``,
-        `- Professor: ${match.professor}`,
-        `- Subject: ${match.subject}`,
-        `- Rating: ${match.stars}/5`,
-        `- Evidence: ${match.review}`,
-      ].join("\n");
-    }
-
-    return `I couldn't find a professor matching "${explicitName}" in the current dataset, but I can help search by subject or teaching style instead.`;
-  }
-
-  const bullets = reviews
-    .slice(0, 3)
-    .map(
-      (review) =>
-        `• ${review.professor} (${review.subject}) — ${review.stars}/5 stars: ${review.review}`
-    )
-    .join("\n");
-
-  return `Based on your question about "${query}", here are the strongest matches:\n\n${bullets}\n\nIf you want, I can narrow this down further by difficulty, workload, or class format.`;
-}
 
 export async function POST(req) {
   try {
@@ -153,8 +48,7 @@ export async function POST(req) {
     recordEvent(user?.userId ?? null, "query", userQuery);
 
     const history = data.slice(0, -1);
-    const reviews = await loadReviews();
-    const rankedReviews = rankReviews(reviews, userQuery);
+    const { matches: rankedReviews } = await searchReviews(userQuery, { limit: 5 });
     const contextText = formatContext(rankedReviews);
 
     const stream = new ReadableStream({
@@ -165,7 +59,7 @@ export async function POST(req) {
           const hasApiKey = Boolean(process.env.OPENAI_API_KEY);
 
           if (!hasApiKey) {
-            const fallback = buildStructuredResponse(userQuery, reviews);
+            const fallback = await buildStructuredResponse(userQuery, rankedReviews);
             const chunks = fallback.match(/.{1,140}/g) || [fallback];
 
             for (const chunk of chunks) {
