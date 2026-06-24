@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 import db from "../../../Lib/db.js";
-import { verifySessionToken } from "../../../Lib/auth.js";
+import { getUserFromRequest } from "../../../Lib/auth.js";
 
 export const runtime = "nodejs";
 
@@ -32,17 +32,6 @@ function rankReviews(reviews, query) {
     .slice(0, 6);
 }
 
-function getUserFromRequest(req) {
-  const token = req.cookies.get("professor_session")?.value;
-  if (!token) return null;
-
-  try {
-    return verifySessionToken(token);
-  } catch {
-    return null;
-  }
-}
-
 export async function POST(req) {
   try {
     const payload = await req.json();
@@ -56,10 +45,6 @@ export async function POST(req) {
     const user = getUserFromRequest(req);
 
     if (user) {
-      db.prepare(
-        "INSERT INTO analytics_events (user_id, event_type, event_value) VALUES (?, ?, ?)"
-      ).run(user.userId, "query", query);
-
       for (const match of ranked) {
         db.prepare(
           "INSERT INTO recommendations (user_id, query, professor, subject, rating, reason) VALUES (?, ?, ?, ?, ?, ?)"

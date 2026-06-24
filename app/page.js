@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Avatar,
   Box,
@@ -16,6 +16,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import ChatMessage from "../components/chat/ChatMessage";
+import { useChatAutoScroll } from "../hooks/useChatAutoScroll";
 
 const quickPrompts = [
   "Best professors for software engineering",
@@ -69,7 +71,10 @@ export default function Home() {
     password: "",
   });
   const [authError, setAuthError] = useState("");
-  const endRef = useRef(null);
+  const { containerRef: chatContainerRef, enableAutoScroll } = useChatAutoScroll(
+    messages,
+    loading
+  );
 
   const fetchUser = async () => {
     try {
@@ -96,10 +101,6 @@ export default function Home() {
     fetchAnalytics();
   }, []);
 
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
-
   const trackEvent = async (eventType, eventValue) => {
     try {
       await fetch("/api/analytics", {
@@ -118,15 +119,17 @@ export default function Home() {
 
     const userMessage = { role: "user", content: text };
     const requestPayload = [...messages, userMessage];
-    const nextMessages = [...requestPayload, { role: "assistant", content: "" }];
+    const nextMessages = [
+      ...requestPayload,
+      { role: "assistant", content: "", pending: true },
+    ];
 
+    enableAutoScroll();
     setMessages(nextMessages);
     setMessage("");
     setLoading(true);
 
     try {
-      await trackEvent("query", text);
-
       const recRes = await fetch("/api/recommendations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -167,7 +170,11 @@ export default function Home() {
           const lastMessage = prev[lastIndex];
           return [
             ...prev.slice(0, lastIndex),
-            { ...lastMessage, content: lastMessage.content + textChunk },
+            {
+              ...lastMessage,
+              content: lastMessage.content + textChunk,
+              pending: false,
+            },
           ];
         });
 
@@ -178,7 +185,7 @@ export default function Home() {
       await fetchAnalytics();
     } catch (error) {
       setMessages((prev) => [
-        ...prev.slice(0, -2),
+        ...prev.slice(0, -1),
         {
           role: "assistant",
           content:
@@ -442,52 +449,18 @@ export default function Home() {
                 </Stack>
               </Box>
 
-              <Box sx={{ p: 2, bgcolor: "#f8fafc", height: 520, overflowY: "auto" }}>
+              <Box
+                ref={chatContainerRef}
+                role="log"
+                aria-live="polite"
+                aria-busy={loading}
+                aria-label="Chat messages"
+                sx={{ p: 2, bgcolor: "#f8fafc", height: 520, overflowY: "auto" }}
+              >
                 <Stack spacing={2}>
                   {messages.map((msg, index) => (
-                    <Box
-                      key={`${msg.role}-${index}`}
-                      sx={{
-                        display: "flex",
-                        justifyContent:
-                          msg.role === "assistant" ? "flex-start" : "flex-end",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          maxWidth: { xs: "90%", md: "78%" },
-                          bgcolor: msg.role === "assistant" ? "white" : "primary.main",
-                          color: msg.role === "assistant" ? "text.primary" : "white",
-                          borderRadius: 3,
-                          px: 2.2,
-                          py: 1.6,
-                          boxShadow:
-                            msg.role === "assistant"
-                              ? "0 10px 30px rgba(15,23,42,0.06)"
-                              : "0 10px 30px rgba(37,99,235,0.24)",
-                          whiteSpace: "pre-wrap",
-                        }}
-                      >
-                        {msg.content}
-                      </Box>
-                    </Box>
+                    <ChatMessage key={`${msg.role}-${index}`} message={msg} />
                   ))}
-                  {loading && (
-                    <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
-                      <Box
-                        sx={{
-                          bgcolor: "white",
-                          borderRadius: 3,
-                          px: 2,
-                          py: 1,
-                          color: "text.secondary",
-                        }}
-                      >
-                        Thinking...
-                      </Box>
-                    </Box>
-                  )}
-                  <div ref={endRef} />
                 </Stack>
               </Box>
 
