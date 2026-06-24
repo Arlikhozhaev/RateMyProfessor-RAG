@@ -1,36 +1,9 @@
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
 import db from "../../../Lib/db.js";
 import { getUserFromRequest } from "../../../Lib/auth.js";
+import { searchReviews } from "../../../Lib/retrieval/search.js";
 
 export const runtime = "nodejs";
-
-async function loadReviews() {
-  const filePath = path.join(process.cwd(), "reviews.json");
-  const raw = await fs.readFile(filePath, "utf8");
-  const parsed = JSON.parse(raw);
-  return Array.isArray(parsed.reviews) ? parsed.reviews : [];
-}
-
-function rankReviews(reviews, query) {
-  const normalizedQuery = query.toLowerCase();
-  const terms = normalizedQuery.split(/\s+/).filter(Boolean);
-
-  return reviews
-    .map((review) => {
-      const text = `${review.professor} ${review.subject} ${review.review}`.toLowerCase();
-      let score = 0;
-      if (text.includes(normalizedQuery)) score += 6;
-      terms.forEach((term) => {
-        if (text.includes(term)) score += 1;
-      });
-      score += review.stars;
-      return { ...review, score };
-    })
-    .sort((a, b) => b.score - a.score || b.stars - a.stars)
-    .slice(0, 6);
-}
 
 export async function POST(req) {
   try {
@@ -40,12 +13,11 @@ export async function POST(req) {
       return NextResponse.json({ error: "A search query is required." }, { status: 400 });
     }
 
-    const reviews = await loadReviews();
-    const ranked = rankReviews(reviews, query);
+    const { matches, method } = await searchReviews(query, { limit: 6 });
     const user = getUserFromRequest(req);
 
     if (user) {
-      for (const match of ranked) {
+      for (const match of matches) {
         db.prepare(
           "INSERT INTO recommendations (user_id, query, professor, subject, rating, reason) VALUES (?, ?, ?, ?, ?, ?)"
         ).run(
@@ -59,7 +31,7 @@ export async function POST(req) {
       }
     }
 
-    return NextResponse.json({ query, matches: ranked });
+    return NextResponse.json({ query, matches, method });
   } catch (error) {
     console.error("Recommendations error:", error);
     return NextResponse.json({ error: "Unable to fetch recommendations." }, { status: 500 });

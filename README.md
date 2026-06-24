@@ -12,27 +12,36 @@ RateMyProfessor-RAG combines:
 
 ## Core Features
 
-- **Professor search and recommendations** using local review data and ranking logic
-- **AI chat assistant** for natural-language questions about professors and courses
+- **Hybrid RAG retrieval** — Pinecone vector search → OpenAI semantic embeddings → keyword fallback
+- **Professor search and recommendations** with match scores grounded in review data
+- **AI chat assistant** with markdown responses and streaming
 - **User authentication** with session cookies and secure password hashing
 - **Analytics tracking** for queries and engagement events
 - **SQLite-backed persistence** for user and recommendation data
 
-## Tech Stack
+## Architecture
 
-- **Frontend:** Next.js, React, Material UI
-- **Backend/API:** Next.js Route Handlers
-- **Database:** SQLite via `better-sqlite3`
-- **Auth:** JWT + cookie sessions
-- **Security:** bcrypt password hashing
-- **Data source:** `reviews.json`
+```
+User query
+    ↓
+Lib/retrieval/search.js  (unified entry point)
+    ├── Pinecone (if PINECONE_API_KEY + OPENAI_API_KEY)
+    ├── Semantic embeddings (if OPENAI_API_KEY)
+    └── Keyword ranking (always available fallback)
+    ↓
+/api/chat + /api/recommendations
+```
 
 ## Project Structure
 
 - `app/` — application pages and API routes
 - `app/api/` — chat, auth, analytics, and recommendation endpoints
-- `lib/` — shared database and authentication helpers
-- `scripts/` — database initialization utilities
+- `Lib/` — database, auth, analytics, and retrieval modules
+- `Lib/retrieval/` — hybrid RAG search (Pinecone, semantic, keyword)
+- `components/` — UI components (chat, auth, recommendations, layout)
+- `hooks/` — client hooks (`useChat`, `useAuth`, `useChatAutoScroll`)
+- `theme/` — MUI design tokens
+- `Scripts/` — database initialization utilities
 - `data/` — local database storage
 - `reviews.json` — professor review dataset
 
@@ -64,7 +73,8 @@ The app will be available at:
 For production deployment, configure the following environment variables as needed:
 - `AUTH_SECRET` for JWT signing
 - `DB_PATH` for database location (optional)
-- `OPENAI_API_KEY` for enhanced AI responses (optional)
+- `OPENAI_API_KEY` for GPT streaming and semantic retrieval (optional)
+- `PINECONE_API_KEY`, `PINECONE_INDEX`, `PINECONE_NAMESPACE` for vector search (optional)
 
 ## Deployment
 
