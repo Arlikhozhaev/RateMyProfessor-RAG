@@ -18,6 +18,17 @@ export function verifySessionToken(token) {
   return jwt.verify(token, JWT_SECRET);
 }
 
+export function getUserFromRequest(req) {
+  const token = req.cookies.get("professor_session")?.value;
+  if (!token) return null;
+
+  try {
+    return verifySessionToken(token);
+  } catch {
+    return null;
+  }
+}
+
 export const sessionCookieOptions = {
   httpOnly: true,
   sameSite: "lax",

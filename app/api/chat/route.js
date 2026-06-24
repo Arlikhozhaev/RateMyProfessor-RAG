@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 import OpenAI from "openai";
+import { getUserFromRequest } from "../../../Lib/auth.js";
+import { recordEvent } from "../../../Lib/analytics.js";
 
 export const runtime = "nodejs";
 
@@ -146,6 +148,9 @@ export async function POST(req) {
         { status: 400 }
       );
     }
+
+    const user = getUserFromRequest(req);
+    recordEvent(user?.userId ?? null, "query", userQuery);
 
     const history = data.slice(0, -1);
     const reviews = await loadReviews();

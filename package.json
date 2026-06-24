@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:init": "node scripts/init-db.mjs"
+    "db:init": "node Scripts/init-db.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
