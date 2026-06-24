@@ -14,10 +14,12 @@ RateMyProfessor-RAG combines:
 
 - **Hybrid RAG retrieval** — Pinecone vector search → OpenAI semantic embeddings → keyword fallback
 - **Professor search and recommendations** with match scores grounded in review data
+- **Professor profile pages** at `/professor/[slug]` with related recommendations
 - **AI chat assistant** with markdown responses and streaming
 - **User authentication** with session cookies and secure password hashing
 - **Analytics tracking** for queries and engagement events
 - **SQLite-backed persistence** for user and recommendation data
+- **Automated quality gates** — unit tests, Playwright E2E, GitHub Actions CI
 
 ## Architecture
 
@@ -35,15 +37,17 @@ Lib/retrieval/search.js  (unified entry point)
 ## Project Structure
 
 - `app/` — application pages and API routes
+- `app/professor/[slug]/` — static professor profile pages
 - `app/api/` — chat, auth, analytics, and recommendation endpoints
-- `Lib/` — database, auth, analytics, and retrieval modules
+- `Lib/` — database, auth, analytics, retrieval, and professor helpers
 - `Lib/retrieval/` — hybrid RAG search (Pinecone, semantic, keyword)
 - `components/` — UI components (chat, auth, recommendations, layout)
 - `hooks/` — client hooks (`useChat`, `useAuth`, `useChatAutoScroll`)
+- `tests/` — Vitest unit tests and Playwright E2E specs
 - `theme/` — MUI design tokens
 - `Scripts/` — database initialization utilities
 - `data/` — local database storage
-- `reviews.json` — professor review dataset
+- `reviews.json` — professor review dataset (41 curated records)
 
 ## Getting Started
 
@@ -68,6 +72,18 @@ npm run dev
 The app will be available at:
 - http://localhost:3000
 
+## Testing
+
+```bash
+npm run test:unit      # Vitest — retrieval + professor slug logic
+npm run test:e2e:setup # First time only — downloads Playwright Chromium
+npm run build          # Required before test:e2e
+npm run test:e2e       # Starts app on port 3001 (avoids conflicts with npm run dev on 3000)
+npm run lint
+```
+
+CI runs automatically via GitHub Actions on push and pull requests.
+
 ## Environment Notes
 
 For production deployment, configure the following environment variables as needed:
@@ -78,7 +94,20 @@ For production deployment, configure the following environment variables as need
 
 ## Deployment
 
-This project is ready to be deployed to any platform that supports Next.js applications, such as Vercel, Azure App Service, or similar hosting providers.
+### Vercel (recommended)
+
+1. Import the GitHub repository in Vercel
+2. Set environment variables from `.env.example`
+3. Deploy — Next.js builds automatically
+
+Notes for production:
+- Set `AUTH_SECRET` to a long random string
+- SQLite via `better-sqlite3` works on Node server runtimes; for pure serverless you may later swap to a hosted DB
+- Re-run `load.ipynb` after changing `reviews.json` if using Pinecone
+
+### Other hosts
+
+Works on any Node.js host that supports Next.js 14 (`npm run build` + `npm run start`).
 
 ## License
 

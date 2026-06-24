@@ -1,7 +1,9 @@
 import { annotateMatches } from "./scoring.js";
 
 export function searchKeyword(reviews, query, limit = 6) {
-  const normalizedQuery = query.toLowerCase();
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) return [];
+
   const terms = normalizedQuery.split(/\s+/).filter(Boolean);
 
   const ranked = reviews

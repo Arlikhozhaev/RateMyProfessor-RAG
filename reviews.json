@@ -209,6 +209,42 @@
       "subject": "Distributed Systems",
       "stars": 5,
       "review": "Dr. Parker explains distributed concepts very clearly and always ties them back to real applications. Students leave with strong confidence."
+    },
+    {
+      "professor": "Dr. Emily Watson",
+      "subject": "Statistics for Engineers",
+      "stars": 4,
+      "review": "Dr. Watson breaks down probability and statistics with practical engineering examples. Clear lectures, fair exams, and helpful office hours."
+    },
+    {
+      "professor": "Prof. James Lee",
+      "subject": "Software Engineering",
+      "stars": 3,
+      "review": "Lee covers the material, but lectures move quickly and project specs can be vague. Self-starters do fine; others may struggle without extra help."
+    },
+    {
+      "professor": "Dr. Susan Wright",
+      "subject": "Technical Writing for CS",
+      "stars": 5,
+      "review": "Dr. Wright helps CS students communicate complex ideas clearly. Assignments are practical and feedback on documentation is excellent."
+    },
+    {
+      "professor": "Mark Thompson",
+      "subject": "Compilers",
+      "stars": 4,
+      "review": "Thompson makes compilers less intimidating with step-by-step labs. Heavy workload, but you actually understand parsing and code generation."
+    },
+    {
+      "professor": "Dr. Aisha Khan",
+      "subject": "Ethics in Artificial Intelligence",
+      "stars": 5,
+      "review": "Dr. Khan leads thoughtful discussions on bias, fairness, and responsible AI. Great for students who want the human side of technology."
+    },
+    {
+      "professor": "Prof. Robert Chen",
+      "subject": "Calculus II",
+      "stars": 1,
+      "review": "Chen reads from slides and rarely pauses for questions. Many students rely on tutoring to pass; not recommended unless you already know the material."
     }
   ]
 }

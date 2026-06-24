@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { Box, Chip, Stack, Typography } from "@mui/material";
+import { professorToSlug } from "../../Lib/professors.js";
 
 function scoreColor(score) {
   if (score >= 80) return "success";
@@ -10,6 +12,7 @@ function scoreColor(score) {
 
 export default function RecommendationCard({ recommendation, onAskAbout }) {
   const hasMatchScore = typeof recommendation.matchScore === "number";
+  const profileHref = `/professor/${professorToSlug(recommendation.professor)}`;
 
   return (
     <Box
@@ -27,7 +30,17 @@ export default function RecommendationCard({ recommendation, onAskAbout }) {
     >
       <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
         <Box sx={{ minWidth: 0 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+          <Typography
+            component={Link}
+            href={profileHref}
+            variant="subtitle2"
+            sx={{
+              fontWeight: 700,
+              color: "text.primary",
+              textDecoration: "none",
+              "&:hover": { color: "primary.main" },
+            }}
+          >
             {recommendation.professor}
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -53,26 +66,39 @@ export default function RecommendationCard({ recommendation, onAskAbout }) {
       <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
         {recommendation.review || "Strong match for the requested criteria."}
       </Typography>
-      {onAskAbout ? (
+      <Stack direction="row" spacing={2} sx={{ mt: 1.5, flexWrap: "wrap" }}>
         <Typography
-          component="button"
+          component={Link}
+          href={profileHref}
           variant="caption"
-          onClick={() => onAskAbout(recommendation)}
           sx={{
-            mt: 1.5,
-            display: "inline-block",
-            border: "none",
-            background: "none",
             color: "primary.main",
             fontWeight: 600,
-            cursor: "pointer",
-            p: 0,
+            textDecoration: "none",
             "&:hover": { textDecoration: "underline" },
           }}
         >
-          Ask about this professor →
+          View profile →
         </Typography>
-      ) : null}
+        {onAskAbout ? (
+          <Typography
+            component="button"
+            variant="caption"
+            onClick={() => onAskAbout(recommendation)}
+            sx={{
+              border: "none",
+              background: "none",
+              color: "primary.main",
+              fontWeight: 600,
+              cursor: "pointer",
+              p: 0,
+              "&:hover": { textDecoration: "underline" },
+            }}
+          >
+            Ask in chat →
+          </Typography>
+        ) : null}
+      </Stack>
     </Box>
   );
 }
