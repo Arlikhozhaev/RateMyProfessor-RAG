@@ -8,6 +8,12 @@ import {
   formatContext,
   buildStructuredResponse,
 } from "../../../Lib/retrieval/search.js";
+import {
+  answerDatasetQuery,
+  formatDatasetSummaryForPrompt,
+  buildDatasetSummary,
+} from "../../../Lib/datasetFacts.js";
+import { loadReviews } from "../../../Lib/retrieval/loadReviews.js";
 
 export const runtime = "nodejs";
 
@@ -22,6 +28,7 @@ When answering:
 - Prefer concise answers with actionable guidance.
 - For exact-name questions, use a short structured explanation: match, subject, rating, and a one-sentence takeaway.
 - Use markdown for lists and emphasis when helpful.
+- When **dataset metadata** is provided, treat it as authoritative for counts, lists, ratings, and name-collision questions. Never infer totals from retrieved professor snippets alone.
 `;
 
 export async function POST(req) {
@@ -61,6 +68,30 @@ export async function POST(req) {
     recordEvent(user?.userId ?? null, "query", userQuery);
 
     const history = data.slice(0, -1);
+    const datasetAnswer = await answerDatasetQuery(userQuery);
+
+    if (datasetAnswer) {
+      const stream = new ReadableStream({
+        async start(controller) {
+          const encoder = new TextEncoder();
+          const chunks = datasetAnswer.match(/.{1,140}/g) || [datasetAnswer];
+
+          for (const chunk of chunks) {
+            controller.enqueue(encoder.encode(chunk));
+            await new Promise((resolve) => setTimeout(resolve, 12));
+          }
+
+          controller.close();
+        },
+      });
+
+      return new NextResponse(stream, {
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
+    }
+
+    const reviews = await loadReviews();
+    const datasetSummary = formatDatasetSummaryForPrompt(buildDatasetSummary(reviews));
     const { matches: rankedReviews } = await searchReviews(userQuery, { limit: 5 });
     const contextText = formatContext(rankedReviews);
 
@@ -91,7 +122,7 @@ export async function POST(req) {
               ...history,
               {
                 role: "user",
-                content: `${userQuery}\n\nProfessor context:\n${contextText}`,
+                content: `${userQuery}\n\nDataset metadata (authoritative):\n${datasetSummary}\n\nRetrieved professor context:\n${contextText}`,
               },
             ],
           });

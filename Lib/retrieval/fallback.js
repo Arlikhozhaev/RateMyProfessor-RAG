@@ -3,15 +3,19 @@ import {
   findExactNameMatches,
 } from "./format.js";
 import { loadReviews } from "./loadReviews.js";
+import { answerDatasetQueryFromReviews } from "../datasetFacts.js";
 
 export async function buildStructuredResponse(query, rankedReviews) {
+  const allReviews = await loadReviews();
+  const datasetAnswer = answerDatasetQueryFromReviews(query, allReviews);
+  if (datasetAnswer) return datasetAnswer;
+
   if (!rankedReviews.length) {
     return "I couldn't find enough professor information right now. Try asking about a specific subject, course difficulty, or teaching style.";
   }
 
   const explicitName = extractNameQuery(query);
   if (explicitName) {
-    const allReviews = await loadReviews();
     const matches = findExactNameMatches(allReviews, explicitName);
     if (matches.length > 0) {
       const match = matches[0];

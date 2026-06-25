@@ -10,6 +10,7 @@
 /coverage
 /test-results/
 /playwright-report/
+.ipynb_checkpoints/
 
 # next.js
 /.next/
@@ -40,3 +41,6 @@ next-env.d.ts
 
 # python virtualenv (use requirements.txt + local venv instead)
 Lib/site-packages/
+
+# local interview prep (do not commit)
+docs/INTERVIEW_PREP.md
