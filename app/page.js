@@ -59,16 +59,17 @@ function HomeContent() {
     sendMessage,
     askAboutProfessor,
     handleKeyDown,
+    chatReady,
   } = useChat(fetchAnalytics);
 
   useEffect(() => {
     const prompt = searchParams.get("prompt");
-    if (!prompt || promptHandledRef.current || loading) return;
+    if (!prompt || promptHandledRef.current || loading || !chatReady) return;
 
     promptHandledRef.current = true;
     sendMessage(prompt);
     router.replace("/", { scroll: false });
-  }, [searchParams, sendMessage, loading, router]);
+  }, [searchParams, sendMessage, loading, chatReady, router]);
 
   const scrollToRecommendations = () => {
     document.getElementById("recommendations")?.scrollIntoView({

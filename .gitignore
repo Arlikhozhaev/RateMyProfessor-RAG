@@ -44,5 +44,5 @@ lib/site-packages/
 scripts/*.exe
 
 # local interview prep (do not commit)
-docs/INTERVIEW_PREP.md
+docs_INTERVIEW_PREP/
 docs/RECORD_DEMO.md

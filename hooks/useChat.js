@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { defaultRecommendations, WELCOME_MESSAGE } from "../constants/app";
+import { loadChatSession, saveChatSession } from "../lib/chatSession.js";
 import { useChatAutoScroll } from "./useChatAutoScroll";
 
 export function useChat(onAnalyticsRefresh) {
@@ -13,6 +14,22 @@ export function useChat(onAnalyticsRefresh) {
   const [recommendations, setRecommendations] = useState(defaultRecommendations);
   const [recommendationsLoading, setRecommendationsLoading] = useState(false);
   const [retrievalMethod, setRetrievalMethod] = useState(null);
+  const [chatReady, setChatReady] = useState(false);
+
+  useEffect(() => {
+    const saved = loadChatSession();
+    if (saved) {
+      setMessages(saved.messages);
+      setRecommendations(saved.recommendations);
+      setRetrievalMethod(saved.retrievalMethod);
+    }
+    setChatReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!chatReady) return;
+    saveChatSession({ messages, recommendations, retrievalMethod });
+  }, [chatReady, messages, recommendations, retrievalMethod]);
 
   const { containerRef: chatContainerRef, enableAutoScroll } = useChatAutoScroll(
     messages,
@@ -137,6 +154,7 @@ export function useChat(onAnalyticsRefresh) {
     recommendations,
     recommendationsLoading,
     retrievalMethod,
+    chatReady,
     chatContainerRef,
     setMessage,
     sendMessage,
