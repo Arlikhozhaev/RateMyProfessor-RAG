@@ -39,8 +39,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# python virtualenv (use requirements.txt + local venv instead)
+# python virtualenv / stray binaries (use requirements.txt + local venv instead)
 lib/site-packages/
+scripts/*.exe
 
 # local interview prep (do not commit)
 docs/INTERVIEW_PREP.md

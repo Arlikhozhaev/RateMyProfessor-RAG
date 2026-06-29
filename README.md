@@ -28,8 +28,8 @@ flowchart TD
   UI --> AuthAPI[/api/auth/*]
 
   ChatAPI --> Router{Query router}
-  Router -->|meta questions| Facts[Lib/datasetFacts.js]
-  Router -->|recommendations| Search[Lib/retrieval/search.js]
+  Router -->|meta questions| Facts[lib/datasetFacts.js]
+  Router -->|recommendations| Search[lib/retrieval/search.js]
 
   Search --> Pinecone[Pinecone vectors]
   Search --> Semantic[OpenAI embeddings]
@@ -64,8 +64,8 @@ flowchart TD
 |------|---------|
 | `app/` | Pages and API routes |
 | `app/professor/[slug]/` | Static professor profile pages (41 routes) |
-| `Lib/retrieval/` | Hybrid RAG search pipeline |
-| `Lib/datasetFacts.js` | Deterministic answers for meta/dataset questions |
+| `lib/retrieval/` | Hybrid RAG search pipeline |
+| `lib/datasetFacts.js` | Deterministic answers for meta/dataset questions |
 | `components/` | UI (chat, auth, recommendations, layout) |
 | `hooks/` | Client hooks (`useChat`, `useAuth`, `useChatAutoScroll`) |
 | `tests/unit/` | Vitest unit tests |
