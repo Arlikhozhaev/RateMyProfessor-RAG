@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { searchKeyword } from "../../Lib/retrieval/keyword.js";
-import { toMatchScore, annotateMatches } from "../../Lib/retrieval/scoring.js";
-import { extractNameQuery, normalizeText } from "../../Lib/retrieval/format.js";
+import { searchKeyword } from "../../lib/retrieval/keyword.js";
+import { toMatchScore, annotateMatches } from "../../lib/retrieval/scoring.js";
+import { extractNameQuery, normalizeText } from "../../lib/retrieval/format.js";
 
 const sampleReviews = [
   {

@@ -5,7 +5,7 @@ import {
   detectDatasetQueryIntent,
   extractSubjectFilter,
   filterReviewsBySubject,
-} from "../../Lib/datasetFacts.js";
+} from "../../lib/datasetFacts.js";
 
 const sampleReviews = [
   { professor: "Dr. Emily Carter", subject: "CS Intro", stars: 5, review: "Great." },
@@ -38,6 +38,21 @@ describe("detectDatasetQueryIntent", () => {
   it("detects duplicate name questions", () => {
     expect(detectDatasetQueryIntent("Are there any professors with identical names?")).toBe(
       "duplicates"
+    );
+    expect(detectDatasetQueryIntent("Are there any professors with similar names?")).toBe(
+      "duplicates"
+    );
+  });
+
+  it("detects shared last name questions", () => {
+    expect(
+      detectDatasetQueryIntent("Are there any professors with the same last name?")
+    ).toBe("shared_last_names");
+  });
+
+  it("detects best-by-subject questions", () => {
+    expect(detectDatasetQueryIntent("Best professors for software engineering")).toBe(
+      "best_by_subject"
     );
   });
 });
@@ -93,6 +108,30 @@ describe("answerDatasetQueryFromReviews", () => {
     expect(answer).toContain("Prof. James Lee");
   });
 
+  it("lists shared last names accurately", () => {
+    const answer = answerDatasetQueryFromReviews(
+      "Are there any professors with the same last name?",
+      sampleReviews
+    );
+
+    expect(answer).toContain("**Yes**");
+    expect(answer).toContain("Carter");
+    expect(answer).toContain("Dr. Emily Carter");
+    expect(answer).toContain("Liam Carter");
+    expect(answer).not.toContain("Dr. Henry Diaz");
+  });
+
+  it("ranks best professors for a subject deterministically", () => {
+    const answer = answerDatasetQueryFromReviews(
+      "Best professors for software engineering",
+      sampleReviews
+    );
+
+    expect(answer).toContain("David Nguyen");
+    expect(answer).toContain("Prof. James Lee");
+    expect(answer.indexOf("David Nguyen")).toBeLessThan(answer.indexOf("Prof. James Lee"));
+  });
+
   it("explains there are no exact duplicate names but notes similar names", () => {
     const answer = answerDatasetQueryFromReviews(
       "Are there any professors with identical names?",
@@ -105,7 +144,7 @@ describe("answerDatasetQueryFromReviews", () => {
 
   it("returns null for normal recommendation questions", () => {
     expect(
-      answerDatasetQueryFromReviews("Who is the best software engineering professor?", sampleReviews)
+      answerDatasetQueryFromReviews("Who teaches intro computer science well?", sampleReviews)
     ).toBeNull();
   });
 });

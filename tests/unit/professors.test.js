@@ -3,7 +3,7 @@ import {
   professorToSlug,
   findProfessorBySlug,
   getRelatedProfessors,
-} from "../../Lib/professors.js";
+} from "../../lib/professors.js";
 
 const reviews = [
   {

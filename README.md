@@ -1,115 +1,132 @@
-# RateMyProfessor-RAG
+# ProfessorMatch AI
 
-A modern AI-powered professor recommendation platform built with Next.js, SQLite, and retrieval-based chat flows. The app helps students explore professors using review data, personalized search results, and a conversational assistant.
+**Live demo:** [professor-match-ai.vercel.app](https://professor-match-ai.vercel.app) · **Repo:** [RateMyProfessor-RAG](https://github.com/Arlikhozhaev/RateMyProfessor-RAG)
+
+An AI-powered professor recommendation platform built with Next.js, hybrid RAG retrieval, and a conversational assistant grounded in curated review data.
+
+![30-second demo](docs/demo.gif)
+
+> **Demo GIF:** Record a ~30s walkthrough (home → chat → recommendations → profile page) and save it as `docs/demo.gif`. See [docs/RECORD_DEMO.md](docs/RECORD_DEMO.md).
 
 ## Overview
 
-RateMyProfessor-RAG combines:
-- a polished student-facing interface for discovering professors,
-- a retrieval-style recommendation engine grounded in local review data,
-- chat-based guidance for course and professor discovery,
-- lightweight user authentication and analytics tracking.
+ProfessorMatch AI helps students discover professors using:
+
+- hybrid retrieval (Pinecone → semantic embeddings → keyword fallback),
+- streaming chat with markdown responses,
+- recommendation cards with match scores,
+- static professor profile pages,
+- auth, analytics, rate limiting, and automated CI/CD.
+
+## Architecture
+
+```mermaid
+flowchart TD
+  User[Student browser] --> UI[Next.js App Router + React + MUI]
+  UI --> ChatAPI[/api/chat]
+  UI --> RecAPI[/api/recommendations]
+  UI --> AuthAPI[/api/auth/*]
+
+  ChatAPI --> Router{Query router}
+  Router -->|meta questions| Facts[Lib/datasetFacts.js]
+  Router -->|recommendations| Search[Lib/retrieval/search.js]
+
+  Search --> Pinecone[Pinecone vectors]
+  Search --> Semantic[OpenAI embeddings]
+  Search --> Keyword[keyword fallback]
+
+  Facts --> Reviews[(reviews.json — 41 professors)]
+  Pinecone --> Reviews
+  Semantic --> Reviews
+  Keyword --> Reviews
+
+  ChatAPI --> GPT[OpenAI GPT-4o-mini stream]
+  AuthAPI --> SQLite[(SQLite + JWT cookies)]
+  RecAPI --> Search
+
+  CI[GitHub Actions] --> Lint --> Unit[RAG eval + unit tests] --> Build --> E2E[Playwright]
+  CI --> Vercel[Vercel CD deploy]
+```
 
 ## Core Features
 
 - **Hybrid RAG retrieval** — Pinecone vector search → OpenAI semantic embeddings → keyword fallback
-- **Professor search and recommendations** with match scores grounded in review data
+- **Deterministic dataset answers** — accurate counts, duplicate subjects, and filtered totals
 - **Professor profile pages** at `/professor/[slug]` with related recommendations
 - **AI chat assistant** with markdown responses and streaming
 - **User authentication** with session cookies and secure password hashing
 - **Analytics tracking** for queries and engagement events
-- **SQLite-backed persistence** for user and recommendation data
-- **Automated quality gates** — unit tests, Playwright E2E, GitHub Actions CI
-
-## Architecture
-
-```
-User query
-    ↓
-Lib/retrieval/search.js  (unified entry point)
-    ├── Pinecone (if PINECONE_API_KEY + OPENAI_API_KEY)
-    ├── Semantic embeddings (if OPENAI_API_KEY)
-    └── Keyword ranking (always available fallback)
-    ↓
-/api/chat + /api/recommendations
-```
+- **Automated quality gates** — unit tests, RAG eval, API integration tests, Playwright E2E, GitHub Actions CI/CD
 
 ## Project Structure
 
-- `app/` — application pages and API routes
-- `app/professor/[slug]/` — static professor profile pages
-- `app/api/` — chat, auth, analytics, and recommendation endpoints
-- `Lib/` — database, auth, analytics, retrieval, and professor helpers
-- `Lib/retrieval/` — hybrid RAG search (Pinecone, semantic, keyword)
-- `components/` — UI components (chat, auth, recommendations, layout)
-- `hooks/` — client hooks (`useChat`, `useAuth`, `useChatAutoScroll`)
-- `tests/` — Vitest unit tests and Playwright E2E specs
-- `theme/` — MUI design tokens
-- `Scripts/` — database initialization utilities
-- `data/` — local database storage
-- `reviews.json` — professor review dataset (41 curated records)
+| Path | Purpose |
+|------|---------|
+| `app/` | Pages and API routes |
+| `app/professor/[slug]/` | Static professor profile pages (41 routes) |
+| `Lib/retrieval/` | Hybrid RAG search pipeline |
+| `Lib/datasetFacts.js` | Deterministic answers for meta/dataset questions |
+| `components/` | UI (chat, auth, recommendations, layout) |
+| `hooks/` | Client hooks (`useChat`, `useAuth`, `useChatAutoScroll`) |
+| `tests/unit/` | Vitest unit tests |
+| `tests/rag-eval/` | Golden retrieval query eval set (20 cases) |
+| `tests/integration/` | API route integration tests |
+| `tests/e2e/` | Playwright browser tests |
+| `reviews.json` | Curated professor dataset (41 records) |
 
 ## Getting Started
 
-### 1. Install dependencies
-
 ```bash
 npm install
-```
-
-### 2. Initialize the database
-
-```bash
 npm run db:init
-```
-
-### 3. Start the development server
-
-```bash
 npm run dev
 ```
 
-The app will be available at:
-- http://localhost:3000
+Open [http://localhost:3000](http://localhost:3000).
 
 ## Testing
 
 ```bash
-npm run test:unit      # Vitest — retrieval + professor slug logic
-npm run test:e2e:setup # First time only — downloads Playwright Chromium
-npm run build          # Required before test:e2e
-npm run test:e2e       # Starts app on port 3001 (avoids conflicts with npm run dev on 3000)
+npm run test:unit          # Unit + RAG eval + API integration tests
+npm run test:rag-eval      # Golden retrieval queries only
+npm run test:integration   # API route tests only
+npm run test:e2e:setup     # First time — install Playwright Chromium
+npm run build              # Required before E2E
+npm run test:e2e           # Browser tests (port 3001)
 npm run lint
 ```
 
-CI runs automatically via GitHub Actions on push and pull requests.
+CI runs on every push and pull request via GitHub Actions, with Vercel deployment on merge.
 
-## Environment Notes
+## Environment Variables
 
-For production deployment, configure the following environment variables as needed:
-- `AUTH_SECRET` for JWT signing
-- `DB_PATH` for database location (optional)
-- `OPENAI_API_KEY` for GPT streaming and semantic retrieval (optional)
-- `PINECONE_API_KEY`, `PINECONE_INDEX`, `PINECONE_NAMESPACE` for vector search (optional)
+Copy `.env.example` to `.env.local` and configure as needed:
+
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `AUTH_SECRET` | Production | JWT session signing |
+| `OPENAI_API_KEY` | Optional | GPT streaming + semantic retrieval |
+| `PINECONE_API_KEY` | Optional | Vector search |
+| `PINECONE_INDEX` | Optional | Default: `rag` |
+| `PINECONE_NAMESPACE` | Optional | Default: `ns1` |
+| `DB_PATH` | Optional | SQLite file location |
+
+Re-run `load.ipynb` (cells 1, 3, 4, 6, 7) after editing `reviews.json` if using Pinecone.
 
 ## Deployment
 
-### Vercel (recommended)
+**Vercel (recommended):** import the GitHub repo, set env vars, deploy.
 
-1. Import the GitHub repository in Vercel
-2. Set environment variables from `.env.example`
-3. Deploy — Next.js builds automatically
+Production notes:
 
-Notes for production:
 - Set `AUTH_SECRET` to a long random string
-- SQLite via `better-sqlite3` works on Node server runtimes; for pure serverless you may later swap to a hosted DB
-- Re-run `load.ipynb` after changing `reviews.json` if using Pinecone
+- SQLite works on Node server runtimes; swap to a hosted DB for multi-instance scale
+- Pinecone index should contain **41 vectors** matching `reviews.json`
 
-### Other hosts
+## Tech Stack
 
-Works on any Node.js host that supports Next.js 14 (`npm run build` + `npm run start`).
+Next.js 14 · React · MUI · Node.js · SQLite · OpenAI · Pinecone · Vitest · Playwright · GitHub Actions · Vercel
 
 ## License
 
-This project is for educational and demonstration purposes.
-
+Educational and demonstration purposes.

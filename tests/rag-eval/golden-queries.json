@@ -1,0 +1,106 @@
+{
+  "description": "Golden retrieval queries evaluated against keyword search (CI-safe, no API keys). Each case expects at least one listed professor in the top results.",
+  "topK": 3,
+  "cases": [
+    {
+      "id": "software-engineering",
+      "query": "software engineering projects and hands-on learning",
+      "expectedProfessors": ["David Nguyen", "Prof. James Lee"]
+    },
+    {
+      "id": "machine-learning",
+      "query": "machine learning engaging professor",
+      "expectedProfessors": ["Dr. Rachel Adams"]
+    },
+    {
+      "id": "artificial-intelligence",
+      "query": "artificial intelligence expert passionate lectures",
+      "expectedProfessors": ["Dr. Alan Thompson"]
+    },
+    {
+      "id": "cybersecurity",
+      "query": "cybersecurity challenging but rewarding",
+      "expectedProfessors": ["Dr. Olivia Harris"]
+    },
+    {
+      "id": "name-emily-carter",
+      "query": "professor named Emily Carter intro computer science",
+      "expectedProfessors": ["Dr. Emily Carter"]
+    },
+    {
+      "id": "calculus-low-rated",
+      "query": "calculus II slides tutoring robert chen",
+      "expectedProfessors": ["Prof. Robert Chen"]
+    },
+    {
+      "id": "operating-systems",
+      "query": "operating systems clear explanations workload",
+      "expectedProfessors": ["Maria Rossi", "Lauren Reed"]
+    },
+    {
+      "id": "web-development",
+      "query": "web development hands-on course",
+      "expectedProfessors": ["Michael Brown"]
+    },
+    {
+      "id": "database-systems",
+      "query": "database systems thorough lectures",
+      "expectedProfessors": ["Dr. James Patel"]
+    },
+    {
+      "id": "nlp",
+      "query": "natural language processing real world applications",
+      "expectedProfessors": ["Dr. Sophia Martinez"]
+    },
+    {
+      "id": "robotics",
+      "query": "robotics real world experience exciting",
+      "expectedProfessors": ["Dr. Marcus Bell"]
+    },
+    {
+      "id": "ethics-ai",
+      "query": "ethics bias fairness responsible AI",
+      "expectedProfessors": ["Dr. Aisha Khan"]
+    },
+    {
+      "id": "cloud-computing",
+      "query": "cloud computing practical examples interactive",
+      "expectedProfessors": ["Ethan Brooks"]
+    },
+    {
+      "id": "hci",
+      "query": "human computer interaction creative feedback",
+      "expectedProfessors": ["Dr. Nina Williams"]
+    },
+    {
+      "id": "statistics",
+      "query": "statistics for engineers probability",
+      "expectedProfessors": ["Dr. Emily Watson", "Noah Kim"]
+    },
+    {
+      "id": "compilers",
+      "query": "compiler design parsing code generation",
+      "expectedProfessors": ["Dr. Grace Liu", "Mark Thompson"]
+    },
+    {
+      "id": "distributed-systems",
+      "query": "distributed systems real applications",
+      "expectedProfessors": ["Dr. Owen Parker"]
+    },
+    {
+      "id": "data-science",
+      "query": "data science industry experience",
+      "expectedProfessors": ["Liam Carter", "Dr. Henry Diaz"]
+    },
+    {
+      "id": "technical-writing",
+      "query": "technical writing documentation CS communication",
+      "expectedProfessors": ["Dr. Susan Wright"]
+    },
+    {
+      "id": "quantum-computing",
+      "query": "quantum computing accessible lectures",
+      "expectedProfessors": ["Dr. Charlotte King"]
+    }
+  ]
+}

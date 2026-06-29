@@ -11,6 +11,8 @@
     "test": "npm run test:unit",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
+    "test:rag-eval": "vitest run tests/rag-eval",
+    "test:integration": "vitest run tests/integration",
     "test:e2e:setup": "playwright install chromium",
     "test:e2e": "playwright test"
   },

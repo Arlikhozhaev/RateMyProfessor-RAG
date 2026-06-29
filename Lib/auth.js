@@ -19,7 +19,14 @@ export function verifySessionToken(token) {
 }
 
 export function getUserFromRequest(req) {
-  const token = req.cookies.get("professor_session")?.value;
+  let token = req.cookies?.get?.("professor_session")?.value;
+
+  if (!token) {
+    const cookieHeader = req.headers.get("cookie");
+    const match = cookieHeader?.match(/professor_session=([^;]+)/);
+    token = match?.[1];
+  }
+
   if (!token) return null;
 
   try {
