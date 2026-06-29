@@ -21,9 +21,9 @@ ProfessorMatch AI helps students discover professors using:
 ```mermaid
 flowchart TD
   User[Student browser] --> UI[Next.js App Router + React + MUI]
-  UI --> ChatAPI[/api/chat]
-  UI --> RecAPI[/api/recommendations]
-  UI --> AuthAPI[/api/auth/*]
+  UI --> ChatAPI["/api/chat"]
+  UI --> RecAPI["/api/recommendations"]
+  UI --> AuthAPI["/api/auth"]
 
   ChatAPI --> Router{Query router}
   Router -->|meta questions| Facts[lib/datasetFacts.js]
@@ -33,16 +33,16 @@ flowchart TD
   Search --> Semantic[OpenAI embeddings]
   Search --> Keyword[keyword fallback]
 
-  Facts --> Reviews[(reviews.json — 41 professors)]
+  Facts --> Reviews[("reviews.json - 41 professors")]
   Pinecone --> Reviews
   Semantic --> Reviews
   Keyword --> Reviews
 
   ChatAPI --> GPT[OpenAI GPT-4o-mini stream]
-  AuthAPI --> SQLite[(SQLite + JWT cookies)]
+  AuthAPI --> SQLite[("SQLite + JWT cookies")]
   RecAPI --> Search
 
-  CI[GitHub Actions] --> Lint --> Unit[RAG eval + unit tests] --> Build --> E2E[Playwright]
+  CI[GitHub Actions] --> Lint[lint] --> Unit[RAG eval + unit tests] --> Build[build] --> E2E[Playwright]
   CI --> Vercel[Vercel CD deploy]
 ```
 
