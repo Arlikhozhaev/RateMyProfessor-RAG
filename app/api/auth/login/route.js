@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
-import db from "../../../../Lib/db.js";
-import { createSessionToken, sessionCookieOptions } from "../../../../Lib/auth.js";
+import db from "../../../../lib/db.js";
+import { createSessionToken, sessionCookieOptions } from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 

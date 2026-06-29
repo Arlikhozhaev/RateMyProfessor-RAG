@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import db from "../../../Lib/db.js";
-import { getUserFromRequest } from "../../../Lib/auth.js";
-import { getAnalyticsSummary, recordEvent } from "../../../Lib/analytics.js";
+import db from "../../../lib/db.js";
+import { getUserFromRequest } from "../../../lib/auth.js";
+import { getAnalyticsSummary, recordEvent } from "../../../lib/analytics.js";
 
 export const runtime = "nodejs";
 

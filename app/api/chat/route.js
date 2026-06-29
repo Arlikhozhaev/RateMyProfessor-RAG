@@ -1,19 +1,19 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
-import { getUserFromRequest } from "../../../Lib/auth.js";
-import { recordEvent } from "../../../Lib/analytics.js";
-import { checkRateLimit, getClientKey } from "../../../Lib/rateLimit.js";
+import { getUserFromRequest } from "../../../lib/auth.js";
+import { recordEvent } from "../../../lib/analytics.js";
+import { checkRateLimit, getClientKey } from "../../../lib/rateLimit.js";
 import {
   searchReviews,
   formatContext,
   buildStructuredResponse,
-} from "../../../Lib/retrieval/search.js";
+} from "../../../lib/retrieval/search.js";
 import {
   answerDatasetQuery,
   formatDatasetSummaryForPrompt,
   buildDatasetSummary,
-} from "../../../Lib/datasetFacts.js";
-import { loadReviews } from "../../../Lib/retrieval/loadReviews.js";
+} from "../../../lib/datasetFacts.js";
+import { loadReviews } from "../../../lib/retrieval/loadReviews.js";
 
 export const runtime = "nodejs";
 

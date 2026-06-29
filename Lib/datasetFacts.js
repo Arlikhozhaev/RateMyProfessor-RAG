@@ -110,11 +110,15 @@ export function buildDatasetSummary(reviews) {
     })),
     sharedFirstNames: sharedFirstNames.map(([name, items]) => ({
       name,
+      displayName: name.charAt(0).toUpperCase() + name.slice(1),
       professors: items.map((item) => item.professor),
+      reviews: items,
     })),
     sharedLastNames: sharedLastNames.map(([name, items]) => ({
       name,
+      displayName: name.charAt(0).toUpperCase() + name.slice(1),
       professors: items.map((item) => item.professor),
+      reviews: items,
     })),
     duplicateSubjects,
   };
@@ -129,6 +133,24 @@ export function formatDatasetSummaryForPrompt(summary) {
     `Shared last names (possible confusion): ${summary.sharedLastNames.length}`,
     `Subjects taught by more than one professor: ${summary.duplicateSubjects.length}`,
   ];
+
+  if (summary.sharedFirstNames.length > 0) {
+    lines.push("Shared first names:");
+    for (const group of summary.sharedFirstNames) {
+      lines.push(
+        `- ${group.displayName}: ${group.reviews.map((r) => `${r.professor} (${r.subject})`).join(", ")}`
+      );
+    }
+  }
+
+  if (summary.sharedLastNames.length > 0) {
+    lines.push("Shared last names:");
+    for (const group of summary.sharedLastNames) {
+      lines.push(
+        `- ${group.displayName}: ${group.reviews.map((r) => `${r.professor} (${r.subject})`).join(", ")}`
+      );
+    }
+  }
 
   if (summary.duplicateSubjects.length > 0) {
     lines.push(
@@ -159,6 +181,23 @@ function isTotalCountQuery(text) {
   ]);
 }
 
+function extractBestSubjectQuery(query) {
+  const text = normalizeText(query);
+  const patterns = [
+    /\b(?:best|top|recommend(?:ed)?)\s+professor(?:s)?\s+(?:for|in|teaching)\s+([a-z0-9 ]{3,60})/,
+    /\b(?:best|top)\s+([a-z0-9 ]{3,60})\s+professor(?:s)?/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match?.[1]) {
+      return match[1].trim().replace(/\s+\?*$/, "");
+    }
+  }
+
+  return null;
+}
+
 function isSubjectCountQuery(text) {
   return (
     extractSubjectFilter(text) !== null &&
@@ -168,6 +207,46 @@ function isSubjectCountQuery(text) {
 
 export function detectDatasetQueryIntent(query) {
   const text = normalizeText(query);
+
+  if (
+    matchesAny(text, [
+      /\bsame last name/,
+      /\bshared last name/,
+      /\bshare.*\blast name/,
+      /\blast name collision/,
+    ])
+  ) {
+    return "shared_last_names";
+  }
+
+  if (
+    matchesAny(text, [
+      /\bsame first name/,
+      /\bshared first name/,
+      /\bshare.*\bfirst name/,
+      /\bfirst name collision/,
+    ])
+  ) {
+    return "shared_first_names";
+  }
+
+  if (
+    matchesAny(text, [
+      /\bsimilar name/,
+      /\bidentical name/,
+      /\bduplicate name/,
+      /\bsame name/,
+      /\bshare.*\bname/,
+      /\bname collision/,
+      /\bnames collide/,
+    ])
+  ) {
+    return "duplicates";
+  }
+
+  if (extractBestSubjectQuery(query)) {
+    return "best_by_subject";
+  }
 
   if (
     matchesAny(text, [
@@ -208,19 +287,6 @@ export function detectDatasetQueryIntent(query) {
 
   if (
     matchesAny(text, [
-      /\bidentical name/,
-      /\bduplicate name/,
-      /\bsame name/,
-      /\bshare.*\bname/,
-      /\bname collision/,
-      /\bnames collide/,
-    ])
-  ) {
-    return "duplicates";
-  }
-
-  if (
-    matchesAny(text, [
       /\blist all\b.*\bprofessor/,
       /\ball professor/,
       /\bevery professor/,
@@ -249,10 +315,12 @@ export function detectDatasetQueryIntent(query) {
 function formatNameGroup(label, groups) {
   if (!groups.length) return null;
 
-  const lines = groups.map(
-    (group) =>
-      `- **${group.name}** → ${group.professors.map((name) => `\`${name}\``).join(", ")}`
-  );
+  const lines = groups.map((group) => {
+    const entries = group.reviews
+      .map((review) => `\`${review.professor}\` (${review.subject})`)
+      .join(", ");
+    return `- **${group.displayName}** → ${entries}`;
+  });
 
   return `${label}:\n${lines.join("\n")}`;
 }
@@ -312,6 +380,62 @@ export function answerDatasetQueryFromReviews(query, reviews) {
       ].join("\n");
     }
 
+    case "shared_last_names": {
+      if (summary.sharedLastNames.length === 0) {
+        return "**No** — no two professors share a last name in this dataset.";
+      }
+
+      const block = formatNameGroup(
+        "Professors grouped by shared last name",
+        summary.sharedLastNames
+      );
+
+      return [
+        `**Yes** — **${summary.sharedLastNames.length} last name(s)** appear more than once:`,
+        "",
+        block,
+      ].join("\n");
+    }
+
+    case "shared_first_names": {
+      if (summary.sharedFirstNames.length === 0) {
+        return "**No** — no two professors share a first name in this dataset.";
+      }
+
+      const block = formatNameGroup(
+        "Professors grouped by shared first name",
+        summary.sharedFirstNames
+      );
+
+      return [
+        `**Yes** — **${summary.sharedFirstNames.length} first name(s)** appear more than once:`,
+        "",
+        block,
+      ].join("\n");
+    }
+
+    case "best_by_subject": {
+      const subjectFilter = extractBestSubjectQuery(query);
+      const matches = filterReviewsBySubject(reviews, subjectFilter).sort(
+        (a, b) => b.stars - a.stars
+      );
+
+      if (matches.length === 0) {
+        return `I couldn't find professors teaching **${subjectFilter}** in the dataset.`;
+      }
+
+      const lines = matches.map(
+        (review) =>
+          `- **${review.professor}** — ${review.subject} (${review.stars}/5): ${review.review}`
+      );
+
+      return [
+        `Here are the **${matches.length} professor(s)** for **${subjectFilter}**, ranked by rating:`,
+        "",
+        lines.join("\n"),
+      ].join("\n");
+    }
+
     case "duplicates": {
       if (summary.exactDuplicateNames.length > 0) {
         const groups = summary.exactDuplicateNames
@@ -324,12 +448,12 @@ export function answerDatasetQueryFromReviews(query, reviews) {
       }
 
       const firstNameBlock = formatNameGroup(
-        "No identical full names, but these professors share a **first name** (easy to confuse in search)",
-        summary.sharedFirstNames.slice(0, 8)
+        "Professors who share a first name",
+        summary.sharedFirstNames
       );
       const lastNameBlock = formatNameGroup(
-        "Professors sharing a **last name**",
-        summary.sharedLastNames.slice(0, 8)
+        "Professors who share a last name",
+        summary.sharedLastNames
       );
 
       return [

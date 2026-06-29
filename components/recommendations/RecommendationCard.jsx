@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Box, Chip, Stack, Typography } from "@mui/material";
-import { professorToSlug } from "../../Lib/professors.js";
+import { professorToSlug } from "../../lib/professors.js";
 
 function scoreColor(score) {
   if (score >= 80) return "success";

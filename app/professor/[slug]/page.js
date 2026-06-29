@@ -9,12 +9,12 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { loadReviews } from "../../../Lib/retrieval/loadReviews.js";
+import { loadReviews } from "../../../lib/retrieval/loadReviews.js";
 import {
   findProfessorBySlug,
   getRelatedProfessors,
   professorToSlug,
-} from "../../../Lib/professors.js";
+} from "../../../lib/professors.js";
 
 export async function generateStaticParams() {
   const reviews = await loadReviews();

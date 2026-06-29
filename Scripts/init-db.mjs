@@ -1,4 +1,4 @@
-import db from "../Lib/db.js";
+import db from "../lib/db.js";
 
 const schema = `
 CREATE TABLE IF NOT EXISTS users (
