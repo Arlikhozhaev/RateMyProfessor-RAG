@@ -6,8 +6,6 @@ An AI-powered professor recommendation platform built with Next.js, hybrid RAG r
 
 ![30-second demo](docs/demo.gif)
 
-> **Demo GIF:** Record a ~30s walkthrough (home → chat → recommendations → profile page) and save it as `docs/demo.gif`. See [docs/RECORD_DEMO.md](docs/RECORD_DEMO.md).
-
 ## Overview
 
 ProfessorMatch AI helps students discover professors using:
