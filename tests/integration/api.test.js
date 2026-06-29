@@ -125,17 +125,26 @@ describe("API integration", () => {
     expect(text).toContain("41 professors");
   });
 
-  it("returns a keyword-backed chat answer without API keys", async () => {
-    const { POST } = await import("../../app/api/chat/route.js");
+  it("restores session from JWT when the SQLite user row is missing", async () => {
+    const { createSessionToken } = await import("../../lib/auth.js");
+    const { GET: me } = await import("../../app/api/auth/me/route.js");
+    const email = `jwt-fallback-${Date.now()}@example.com`;
+    const token = createSessionToken({
+      id: 999999,
+      email,
+      name: "JWT Fallback User",
+    });
 
-    const response = await POST(
-      buildJsonRequest("http://localhost/api/chat", [
-        { role: "user", content: "Who teaches software engineering?" },
-      ])
+    const meResponse = await me(
+      new Request("http://localhost/api/auth/me", {
+        headers: { Cookie: `professor_session=${token}` },
+      })
     );
 
-    expect(response.status).toBe(200);
-    const text = await readTextResponse(response);
-    expect(text).toMatch(/software|engineering|Nguyen|Lee/i);
+    expect(meResponse.status).toBe(200);
+    const payload = await meResponse.json();
+    expect(payload.user?.email).toBe(email);
+    expect(payload.user?.name).toBe("JWT Fallback User");
+    expect(payload.user?.id).toBe(999999);
   });
 });

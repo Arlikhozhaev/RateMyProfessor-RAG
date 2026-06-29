@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Box, CircularProgress, Stack } from "@mui/material";
 import HeroBanner from "../components/layout/HeroBanner";
 import AuthPanel from "../components/auth/AuthPanel";
@@ -12,6 +12,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useChat } from "../hooks/useChat";
 
 function HomeContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const promptHandledRef = useRef(false);
   const [analytics, setAnalytics] = useState({
@@ -36,6 +37,7 @@ function HomeContent() {
 
   const {
     user,
+    authLoading,
     authMode,
     authForm,
     authError,
@@ -65,7 +67,8 @@ function HomeContent() {
 
     promptHandledRef.current = true;
     sendMessage(prompt);
-  }, [searchParams, sendMessage, loading]);
+    router.replace("/", { scroll: false });
+  }, [searchParams, sendMessage, loading, router]);
 
   const scrollToRecommendations = () => {
     document.getElementById("recommendations")?.scrollIntoView({
@@ -97,6 +100,7 @@ function HomeContent() {
           <Box sx={{ flex: 0.8 }}>
             <AuthPanel
               user={user}
+              authLoading={authLoading}
               analytics={analytics}
               authMode={authMode}
               authForm={authForm}

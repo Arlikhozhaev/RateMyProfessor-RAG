@@ -12,11 +12,25 @@ import {
   Typography,
 } from "@mui/material";
 
-export default function AuthPanel({ user, analytics, authMode, authForm, authError, onAuthModeChange, onAuthFormChange, onAuthSubmit }) {
+export default function AuthPanel({
+  user,
+  authLoading,
+  analytics,
+  authMode,
+  authForm,
+  authError,
+  onAuthModeChange,
+  onAuthFormChange,
+  onAuthSubmit,
+}) {
   return (
     <Card sx={{ height: "100%" }}>
       <CardContent sx={{ p: 3 }}>
-        {user ? (
+        {authLoading ? (
+          <Typography variant="body2" color="text.secondary">
+            Checking your session...
+          </Typography>
+        ) : user ? (
           <>
             <Typography variant="overline" color="text.secondary">
               Your dashboard

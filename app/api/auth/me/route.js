@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import db from "../../../../lib/db.js";
-import { verifySessionToken } from "../../../../lib/auth.js";
+import {
+  getSessionTokenFromRequest,
+  sessionUserFromToken,
+  verifySessionToken,
+} from "../../../../lib/auth.js";
 
 export const runtime = "nodejs";
 
 export async function GET(req) {
-  const token = req.cookies.get("professor_session")?.value;
+  const token = getSessionTokenFromRequest(req);
 
   if (!token) {
     return NextResponse.json({ user: null }, { status: 200 });
@@ -17,12 +21,13 @@ export async function GET(req) {
       .prepare("SELECT id, email, name FROM users WHERE id = ?")
       .get(decoded.userId);
 
-    if (!user) {
-      return NextResponse.json({ user: null }, { status: 200 });
+    if (user) {
+      return NextResponse.json({ user }, { status: 200 });
     }
 
-    return NextResponse.json({ user }, { status: 200 });
-  } catch (error) {
+    // Cookie is valid but the SQLite row may be on another serverless instance.
+    return NextResponse.json({ user: sessionUserFromToken(decoded) }, { status: 200 });
+  } catch {
     return NextResponse.json({ user: null }, { status: 200 });
   }
 }

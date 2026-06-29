@@ -41,6 +41,7 @@ export function useChat(onAnalyticsRefresh) {
         const recRes = await fetch("/api/recommendations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ query: text }),
         });
         const recData = await recRes.json();
@@ -55,6 +56,7 @@ export function useChat(onAnalyticsRefresh) {
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify(requestPayload),
         });
 

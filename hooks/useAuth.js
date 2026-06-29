@@ -2,19 +2,26 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+const fetchOptions = { credentials: "include" };
+
 export function useAuth(onAnalyticsRefresh) {
   const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [authMode, setAuthMode] = useState("login");
   const [authForm, setAuthForm] = useState({ name: "", email: "", password: "" });
   const [authError, setAuthError] = useState("");
 
   const fetchUser = useCallback(async () => {
+    setAuthLoading(true);
+
     try {
-      const res = await fetch("/api/auth/me");
+      const res = await fetch("/api/auth/me", fetchOptions);
       const data = await res.json();
       setUser(data.user);
     } catch {
       setUser(null);
+    } finally {
+      setAuthLoading(false);
     }
   }, []);
 
@@ -27,6 +34,7 @@ export function useAuth(onAnalyticsRefresh) {
       await fetch("/api/analytics", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ eventType, eventValue }),
       });
     } catch {
@@ -52,6 +60,7 @@ export function useAuth(onAnalyticsRefresh) {
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
       const data = await response.json();
@@ -70,13 +79,14 @@ export function useAuth(onAnalyticsRefresh) {
   };
 
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     setUser(null);
     await onAnalyticsRefresh?.();
   };
 
   return {
     user,
+    authLoading,
     authMode,
     authForm,
     authError,
