@@ -34,30 +34,49 @@ Built to demonstrate production-minded full-stack and ML systems engineering —
 
 ```mermaid
 flowchart TD
-  User[Student browser] --> UI[Next.js App Router + React + MUI]
-  UI --> ChatAPI["/api/chat"]
-  UI --> RecAPI["/api/recommendations"]
-  UI --> AuthAPI["/api/auth"]
+  User["Student browser"]
+  UI["Next.js App Router, React, MUI"]
+  ChatAPI["POST api chat"]
+  RecAPI["POST api recommendations"]
+  AuthAPI["POST api auth"]
+  Router{"Query router"}
+  Facts["datasetFacts module"]
+  Search["retrieval search module"]
+  Pinecone["Pinecone vectors"]
+  Semantic["OpenAI embeddings"]
+  Keyword["Keyword fallback"]
+  Reviews["reviews.json, 41 professors"]
+  GPT["OpenAI GPT stream"]
+  SQLite["SQLite and JWT cookies"]
+  CI["GitHub Actions"]
+  Lint["Lint"]
+  Unit["Unit and RAG eval tests"]
+  Build["Production build"]
+  E2E["Playwright E2E"]
+  Vercel["Vercel deploy"]
 
-  ChatAPI --> Router{Query router}
-  Router -->|meta questions| Facts[lib/datasetFacts.js]
-  Router -->|recommendations| Search[lib/retrieval/search.js]
-
-  Search --> Pinecone[Pinecone vectors]
-  Search --> Semantic[OpenAI embeddings]
-  Search --> Keyword[keyword fallback]
-
-  Facts --> Reviews[("reviews.json - 41 professors")]
+  User --> UI
+  UI --> ChatAPI
+  UI --> RecAPI
+  UI --> AuthAPI
+  ChatAPI --> Router
+  Router -->|meta questions| Facts
+  Router -->|recommendations| Search
+  Search --> Pinecone
+  Search --> Semantic
+  Search --> Keyword
+  Facts --> Reviews
   Pinecone --> Reviews
   Semantic --> Reviews
   Keyword --> Reviews
-
-  ChatAPI --> GPT[OpenAI GPT-4o-mini stream]
-  AuthAPI --> SQLite[("SQLite + JWT cookies")]
+  ChatAPI --> GPT
+  AuthAPI --> SQLite
   RecAPI --> Search
-
-  CI[GitHub Actions] --> Lint[lint] --> Unit[RAG eval + unit tests] --> Build[build] --> E2E[Playwright]
-  CI --> Vercel[Vercel CD deploy]
+  CI --> Lint
+  Lint --> Unit
+  Unit --> Build
+  Build --> E2E
+  CI --> Vercel
 ```
 
 ## Core Features
