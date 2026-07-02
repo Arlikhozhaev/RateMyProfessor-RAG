@@ -2,19 +2,33 @@
 
 **Live demo:** [professor-match-ai.vercel.app](https://professor-match-ai.vercel.app) · **Repo:** [RateMyProfessor-RAG](https://github.com/Arlikhozhaev/RateMyProfessor-RAG)
 
-An AI-powered professor recommendation platform built with Next.js, hybrid RAG retrieval, and a conversational assistant grounded in curated review data.
+ProfessorMatch AI is a full-stack professor recommendation platform that turns unstructured course reviews into conversational, grounded search. Students ask natural-language questions; the system retrieves relevant profiles from a 41-record dataset, ranks matches with explainable scores, and streams LLM answers anchored to real review data.
 
 ![30-second demo](docs/demo.gif)
 
+## Highlights
+
+Built to demonstrate production-minded full-stack and ML systems engineering — not a toy chatbot wrapper.
+
+| Outcome | Measured by | How |
+|--------|-------------|-----|
+| **Reliable retrieval at scale** | 3-tier fallback across 41 indexed professors | Pinecone vector search → OpenAI semantic embeddings → local keyword matching, so recommendations still work when external APIs are unavailable |
+| **Factual answers on dataset questions** | 100% deterministic routing for meta-queries | Query router sends counts, duplicate subjects, and name-collision questions to `datasetFacts.js`, bypassing the LLM for grounded facts |
+| **Shippable quality bar** | 56 automated tests across 4 layers | Vitest unit tests, 20-case golden RAG eval, API integration suite, and Playwright E2E — all gated in GitHub Actions on every push/PR |
+| **Complete product surface** | 41 pre-rendered profile routes + live chat | Next.js App Router UI with streaming GPT-4o-mini responses, JWT auth, analytics, rate limiting, and Vercel CD deploy |
+
 ## Overview
 
-ProfessorMatch AI helps students discover professors using:
+**Problem:** Students planning courses waste time scanning unstructured reviews with no way to match teaching style, workload, or subject fit to their goals.
 
-- hybrid retrieval (Pinecone → semantic embeddings → keyword fallback),
-- streaming chat with markdown responses,
-- recommendation cards with match scores,
-- static professor profile pages,
-- auth, analytics, rate limiting, and automated CI/CD.
+**Solution:** A hybrid RAG architecture that grounds every AI response in curated data (`reviews.json`). Retrieval ranks professors by relevance; chat explains tradeoffs in plain language; profile pages deep-link back into the assistant for follow-up questions.
+
+**Engineering decisions worth noting:**
+
+- **Graceful degradation** — vector and semantic paths fail open to keyword search instead of breaking the UX
+- **Query routing** — separates recommendation retrieval from deterministic dataset logic, reducing hallucination risk on factual questions
+- **Session persistence** — chat history survives navigation between home and professor profiles via `sessionStorage`
+- **Serverless-aware auth** — JWT session restore when SQLite rows are missing across Vercel instances
 
 ## Architecture
 
@@ -49,21 +63,21 @@ flowchart TD
 ## Core Features
 
 - **Hybrid RAG retrieval** — Pinecone vector search → OpenAI semantic embeddings → keyword fallback
-- **Deterministic dataset answers** — accurate counts, duplicate subjects, and filtered totals
-- **Professor profile pages** at `/professor/[slug]` with related recommendations
-- **AI chat assistant** with markdown responses and streaming
-- **User authentication** with session cookies and secure password hashing
-- **Analytics tracking** for queries and engagement events
-- **Automated quality gates** — unit tests, RAG eval, API integration tests, Playwright E2E, GitHub Actions CI/CD
+- **Deterministic dataset answers** — accurate counts, duplicate subjects, and filtered totals without LLM guesswork
+- **41 static professor profiles** at `/professor/[slug]` with related recommendations and chat deep links
+- **Streaming AI assistant** — markdown responses via GPT-4o-mini with retrieved context
+- **Auth & observability** — bcrypt password hashing, HTTP-only JWT cookies, query/engagement analytics, API rate limiting
+- **CI/CD pipeline** — lint → 56 tests → production build → Playwright E2E → Vercel deploy
 
 ## Project Structure
 
 | Path | Purpose |
 |------|---------|
 | `app/` | Pages and API routes |
-| `app/professor/[slug]/` | Static professor profile pages (41 routes) |
+| `app/professor/[slug]/` | Static professor profile pages (41 SSG routes) |
 | `lib/retrieval/` | Hybrid RAG search pipeline |
 | `lib/datasetFacts.js` | Deterministic answers for meta/dataset questions |
+| `lib/chatSession.js` | Client-side chat persistence across navigation |
 | `components/` | UI (chat, auth, recommendations, layout) |
 | `hooks/` | Client hooks (`useChat`, `useAuth`, `useChatAutoScroll`) |
 | `tests/unit/` | Vitest unit tests |
@@ -85,16 +99,16 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Testing
 
 ```bash
-npm run test:unit          # Unit + RAG eval + API integration tests
-npm run test:rag-eval      # Golden retrieval queries only
-npm run test:integration   # API route tests only
+npm run test:unit          # 56 tests — unit + RAG eval + API integration
+npm run test:rag-eval      # 20 golden retrieval queries
+npm run test:integration   # Auth, recommendations, and chat API routes
 npm run test:e2e:setup     # First time — install Playwright Chromium
 npm run build              # Required before E2E
 npm run test:e2e           # Browser tests (port 3001)
 npm run lint
 ```
 
-CI runs on every push and pull request via GitHub Actions, with Vercel deployment on merge.
+CI runs on every push and pull request via GitHub Actions, with Vercel deployment on merge to `main`.
 
 ## Environment Variables
 
